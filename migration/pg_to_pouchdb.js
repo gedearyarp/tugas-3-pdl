@@ -4,7 +4,6 @@ const PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
 
 const postgresPool = new Pool({
-  // Konfigurasi koneksi database PostgreSQL Anda
   user: process.env.POSTGRES_DB_USER,
   host: process.env.POSTGRES_DB_HOST,
   database: process.env.POSTGRES_DB_NAME,
@@ -12,12 +11,14 @@ const postgresPool = new Pool({
   port: process.env.POSTGRES_DB_PORT,
 });
 
-const dbDosen = new PouchDB('http://localhost:5984/dosen');
-const dbMahasiswa = new PouchDB('http://localhost:5984/mahasiswa');
-const dbMataKuliah = new PouchDB('http://localhost:5984/matakuliah');
-const dbMembimbing = new PouchDB('http://localhost:5984/membimbing');
-const dbMengajar = new PouchDB('http://localhost:5984/mengajar');
-const dbMengambil = new PouchDB('http://localhost:5984/mengambil');
+const pouchDbHost = process.env.POUCHDB_SERVER_HOST || 'localhost';
+
+const dbDosen = new PouchDB(pouchDbHost + 'dosen');
+const dbMahasiswa = new PouchDB(pouchDbHost + 'mahasiswa');
+const dbMataKuliah = new PouchDB(pouchDbHost + 'matakuliah');
+const dbMembimbing = new PouchDB(pouchDbHost + 'membimbing');
+const dbMengajar = new PouchDB(pouchDbHost + 'mengajar');
+const dbMengambil = new PouchDB(pouchDbHost + 'mengambil');
 
 const migrateData = async () => {
   try {
