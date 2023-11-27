@@ -1,7 +1,9 @@
 # Tugas 3 Pemodelan Data Lanjut | PouchDB
 
 ## Ownership
-Developed by: I Gede Arya Raditya Parameswara - 13520036
+Developer Name: I Gede Arya Raditya Parameswara
+
+Student ID / NIM: 13520036
 
 ## Overall Design
 ![image](https://github.com/gedearyarp/tugas-3-pdl/assets/71829426/493a1713-bdb5-4c7e-ac18-b01f00e2547a)
