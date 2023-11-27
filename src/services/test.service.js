@@ -1,5 +1,6 @@
-const { getClient } = require('../connectors/postgresql');
+const { getPgClient } = require('../connectors/postgresql');
 const { postgresqlRead1, postgresqlRead2, postgresqlRead3 } = require('../interfaces/postgresql');
+const { pouchdbRead1, pouchdbRead2, pouchdbRead3 } = require('../interfaces/pouchdb');
 
 const timerFunction = async (func) => {
     const start = new Date();
@@ -11,29 +12,56 @@ const timerFunction = async (func) => {
 }
 
 const read1 = async () => {
-    const client = await getClient();
-    const pgResult = await timerFunction(() => postgresqlRead1(client));
+    const pgClient = await getPgClient();
+
+    const pgResult = await timerFunction(() => postgresqlRead1(pgClient));
+    const pouchResult = await timerFunction(() => pouchdbRead1());
 
     return {
-        postgresql: pgResult
+        run_time: {
+            postgresql: pgResult.time,
+            pouchdb: pouchResult.time
+        },
+        value: {
+            postgresql: pgResult.val,
+            pouchdb: pouchResult.val
+        }       
     };
 }
 
 const read2 = async () => {
-    const client = await getClient();
-    const pgResult = await timerFunction(() => postgresqlRead2(client));
+    const pgClient = await getPgClient();
+
+    const pgResult = await timerFunction(() => postgresqlRead2(pgClient));
+    const pouchResult = await timerFunction(() => pouchdbRead2());
 
     return {
-        postgresql: pgResult
+        run_time: {
+            postgresql: pgResult.time,
+            pouchdb: pouchResult.time
+        },
+        value: {
+            postgresql: pgResult.val,
+            pouchdb: pouchResult.val
+        }       
     };
 }
 
 const read3 = async () => {
-    const client = await getClient();
-    const pgResult = await timerFunction(() => postgresqlRead3(client));
+    const pgClient = await getPgClient();
+
+    const pgResult = await timerFunction(() => postgresqlRead3(pgClient));
+    const pouchResult = await timerFunction(() => pouchdbRead3());
 
     return {
-        postgresql: pgResult
+        run_time: {
+            postgresql: pgResult.time,
+            pouchdb: pouchResult.time
+        },
+        value: {
+            postgresql: pgResult.val,
+            pouchdb: pouchResult.val
+        }       
     };
 }
 

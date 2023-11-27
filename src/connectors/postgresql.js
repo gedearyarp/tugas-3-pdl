@@ -8,7 +8,7 @@ const pool = new Pool({
     port: process.env.POSTGRES_DB_PORT,
 });
 
-const getClient = async () => {
+const getPgClient = async () => {
     const client = await pool.connect();
     return client;
 };
@@ -23,4 +23,4 @@ const exec = async (client, query) => {
     }
 };
 
-module.exports = { getClient, exec };
+module.exports = { getPgClient, exec };
