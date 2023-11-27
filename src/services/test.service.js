@@ -1,6 +1,22 @@
 const { getPgClient } = require('../connectors/postgresql');
-const { postgresqlRead1, postgresqlRead2, postgresqlRead3 } = require('../interfaces/postgresql');
-const { pouchdbRead1, pouchdbRead2, pouchdbRead3 } = require('../interfaces/pouchdb');
+const { 
+    postgresqlRead1, 
+    postgresqlRead2, 
+    postgresqlRead3,
+    getMahasiswaPostgresql,
+    createMahasiswaPostgresql,
+    updateMahasiswaPostgresql,
+    deleteMahasiswaPostgresql
+} = require('../interfaces/postgresql');
+const { 
+    pouchdbRead1, 
+    pouchdbRead2, 
+    pouchdbRead3, 
+    getMahasiswaPouchdb, 
+    insertMahasiswaPouchdb, 
+    updateMahasiswaPouchdb, 
+    deleteMahasiswaPouchdb 
+} = require('../interfaces/pouchdb');
 
 const timerFunction = async (func) => {
     const start = new Date();
@@ -65,4 +81,46 @@ const read3 = async () => {
     };
 }
 
-module.exports = { read1, read2, read3 };
+const insertMahasiswa = async (body) => {
+    const pgClient = await getPgClient();
+
+    const pgResult = await timerFunction(() => createMahasiswaPostgresql(pgClient, body));
+    const pouchResult = await timerFunction(() => insertMahasiswaPouchdb(body));
+
+    return {
+        run_time: {
+            postgresql: pgResult.time,
+            pouchdb: pouchResult.time
+        }    
+    };
+}
+
+const updateMahasiswa = async (body) => {
+    const pgClient = await getPgClient();
+
+    const pgResult = await timerFunction(() => updateMahasiswaPostgresql(pgClient, body));
+    const pouchResult = await timerFunction(() => updateMahasiswaPouchdb(body));
+
+    return {
+        run_time: {
+            postgresql: pgResult.time,
+            pouchdb: pouchResult.time
+        }    
+    };
+}
+
+const deleteMahasiswa = async (body) => {
+    const pgClient = await getPgClient();
+
+    const pgResult = await timerFunction(() => deleteMahasiswaPostgresql(pgClient, body.nim));
+    const pouchResult = await timerFunction(() => deleteMahasiswaPouchdb(body.nim));
+
+    return {
+        run_time: {
+            postgresql: pgResult.time,
+            pouchdb: pouchResult.time
+        }    
+    };
+}
+
+module.exports = { read1, read2, read3, insertMahasiswa, updateMahasiswa, deleteMahasiswa };

@@ -39,4 +39,55 @@ const postgresqlRead3 = async (client) => {
     return val;
 }
 
-module.exports = { postgresqlRead1, postgresqlRead2, postgresqlRead3 };
+const getMahasiswaPostgresql = async (client, nim) => {
+    const query = `
+        SELECT *
+        FROM Mahasiswa
+        WHERE nim = '${nim}';
+    `
+    const result = await exec(client, query);
+    const val = result.rows;
+    return val;
+}
+
+const createMahasiswaPostgresql = async (client, mahasiswa) => {
+    const query = `
+        INSERT INTO Mahasiswa (nim, name, date_of_birth)
+        VALUES ('${mahasiswa.nim}', '${mahasiswa.name}', '${mahasiswa.date_of_birth}');
+    `
+    const result = await exec(client, query);
+    const val = result.rows;
+    return val;
+}
+
+const updateMahasiswaPostgresql = async (client, mahasiswa) => {
+    const query = `
+        UPDATE Mahasiswa
+        SET name = '${mahasiswa.name}', date_of_birth = '${mahasiswa.date_of_birth}'
+        WHERE nim = '${mahasiswa.nim}';
+    `
+    const result = await exec(client, query);
+    const val = result.rows;
+    return val;
+}
+
+const deleteMahasiswaPostgresql = async (client, mahasiswaNim) => {
+    const query = `
+        UPDATE Mahasiswa
+        SET nim = -1
+        WHERE nim = '${mahasiswaNim}';
+    `
+    const result = await exec(client, query);
+    const val = result.rows;
+    return val;
+}
+
+module.exports = { 
+    postgresqlRead1, 
+    postgresqlRead2, 
+    postgresqlRead3,
+    getMahasiswaPostgresql,
+    createMahasiswaPostgresql,
+    updateMahasiswaPostgresql,
+    deleteMahasiswaPostgresql
+};

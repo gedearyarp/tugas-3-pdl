@@ -80,64 +80,158 @@ const pouchdbRead2 = async () => {
 }
 
 const pouchdbRead3 = async () => {
-    const mahasiswaClient = getPouchClient('mahasiswa');
-    const mengambilClient = getPouchClient('mengambil');
-    const mataKuliahClient = getPouchClient('matakuliah');
+    try {
+        const mahasiswaClient = getPouchClient('mahasiswa');
+        const mengambilClient = getPouchClient('mengambil');
+        const mataKuliahClient = getPouchClient('matakuliah');
 
-    const allMahasiswa = await mahasiswaClient.allDocs({ include_docs: true });
-    const mahasiswaAgeMap = allMahasiswa.rows.reduce((acc, row) => {
-        const birthdate = new Date(row.doc.date_of_birth);
-        const ageDifMs = Date.now() - birthdate.getTime();
-        const ageDate = new Date(ageDifMs);
-        acc[row.doc.mahasiswa_id] = ageDate;
-        return acc;
-    }, {});
+        const allMahasiswa = await mahasiswaClient.allDocs({ include_docs: true });
+        const mahasiswaAgeMap = allMahasiswa.rows.reduce((acc, row) => {
+            const birthdate = new Date(row.doc.date_of_birth);
+            const ageDifMs = Date.now() - birthdate.getTime();
+            const ageDate = new Date(ageDifMs);
+            acc[row.doc.mahasiswa_id] = ageDate;
+            return acc;
+        }, {});
 
-    const allMataKuliah = await mataKuliahClient.allDocs({ include_docs: true });
-    const mataKuliahMap = allMataKuliah.rows.reduce((acc, row) => {
-        acc[row.doc.matkul_id] = row.doc.name;
-        return acc;
-    });
+        const allMataKuliah = await mataKuliahClient.allDocs({ include_docs: true });
+        const mataKuliahMap = allMataKuliah.rows.reduce((acc, row) => {
+            acc[row.doc.matkul_id] = row.doc.name;
+            return acc;
+        });
 
-    const allMengambil = await mengambilClient.allDocs({ include_docs: true });
+        const allMengambil = await mengambilClient.allDocs({ include_docs: true });
 
-    const maxMinAgeMatkul = {};
-    allMengambil.rows.forEach(element => {
-        if (!maxMinAgeMatkul[element.doc.matkul_id]) {
-            maxMinAgeMatkul[element.doc.matkul_id] = {
-                max: 0,
-                min: 1e18
+        const maxMinAgeMatkul = {};
+        allMengambil.rows.forEach(element => {
+            if (!maxMinAgeMatkul[element.doc.matkul_id]) {
+                maxMinAgeMatkul[element.doc.matkul_id] = {
+                    max: 0,
+                    min: 1e18
+                }
+            }
+
+            const curAge = mahasiswaAgeMap[element.doc.mahasiswa_id];
+            if (curAge > maxMinAgeMatkul[element.doc.matkul_id].max) {
+                maxMinAgeMatkul[element.doc.matkul_id].max = curAge;
+            }
+
+            if (curAge < maxMinAgeMatkul[element.doc.matkul_id].min) {
+                maxMinAgeMatkul[element.doc.matkul_id].min = curAge;
+            }
+        });
+
+        let res = {
+            mata_kuliah: '',
+            age_difference: 0
+        };
+
+        for (const key in maxMinAgeMatkul) {
+            const cur = maxMinAgeMatkul[key];
+            const curDiff = new Date(cur.max - cur.min);
+            if (curDiff > res.age_difference) {
+                res = {
+                    mata_kuliah: mataKuliahMap[key],
+                    age_difference: curDiff.getTime()
+                }
             }
         }
 
-        const curAge = mahasiswaAgeMap[element.doc.mahasiswa_id];
-        if (curAge > maxMinAgeMatkul[element.doc.matkul_id].max) {
-            maxMinAgeMatkul[element.doc.matkul_id].max = curAge;
-        }
-
-        if (curAge < maxMinAgeMatkul[element.doc.matkul_id].min) {
-            maxMinAgeMatkul[element.doc.matkul_id].min = curAge;
-        }
-    });
-
-    let res = {
-        mata_kuliah: '',
-        age_difference: 0
-    };
-
-    for (const key in maxMinAgeMatkul) {
-        const cur = maxMinAgeMatkul[key];
-        const curDiff = new Date(cur.max - cur.min);
-        if (curDiff > res.age_difference) {
-            res = {
-                mata_kuliah: mataKuliahMap[key],
-                age_difference: curDiff.getTime()
-            }
-        }
+        return res;
+    } catch (err) {
+        console.error('err', err);
+        return {};
     }
-
-    return res;
 }
 
+const getMahasiswaPouchdb = async (mahasiswaId) => {
+    try {
+        const mahasiswaClient = getPouchClient('mahasiswa');
+        const res = await mahasiswaClient.get(mahasiswaId);
+        return res;
+    } catch (err) {
+        console.error('err', err);
+        return null;
+    }
+}
 
-module.exports = { pouchdbRead1, pouchdbRead2, pouchdbRead3 };
+const insertMahasiswaPouchdb = async (mahasiswa) => {
+    try {
+        const mahasiswaClient = getPouchClient('mahasiswa');
+        const res = await mahasiswaClient.post(mahasiswa);
+        return res;
+    } catch (err) {
+        console.error('err', err);
+        return null;
+    }
+}
+
+const updateMahasiswaPouchdb = async (mahasiswa) => {
+    try {
+        const mahasiswaClient = getPouchClient('mahasiswa');
+        
+        await mahasiswaClient.createIndex({
+            index: {
+                fields: ['nim']
+            }
+        });
+
+        const res = await mahasiswaClient.find({
+            selector: {
+                nim: mahasiswa.nim
+            }
+        });
+
+        if (res.docs.length === 0) return null;
+
+        const students = res.docs;
+        const promises = students.map(student => mahasiswaClient.put({
+            ...student,
+            ...mahasiswa
+        }));
+
+        await Promise.all(promises);
+
+        return res;
+    } catch (err) {
+        console.error('err', err);
+        return null;
+    }
+}
+
+const deleteMahasiswaPouchdb = async (mahasiswaNim) => {
+    try {
+        const mahasiswaClient = getPouchClient('mahasiswa');
+        
+        await mahasiswaClient.createIndex({
+            index: {
+                fields: ['nim']
+            }
+        });
+
+        const res = await mahasiswaClient.find({
+            selector: {
+                nim: mahasiswaNim
+            }
+        });
+
+        const students = res.docs;
+        const promises = students.map(student => mahasiswaClient.remove(student));
+        await Promise.all(promises);
+
+        return res;
+    } catch (err) {
+        console.error('err', err);
+        return null;
+    }
+}
+
+module.exports = { 
+    pouchdbRead1, 
+    pouchdbRead2, 
+    pouchdbRead3, 
+    getMahasiswaPouchdb, 
+    insertMahasiswaPouchdb, 
+    updateMahasiswaPouchdb, 
+    deleteMahasiswaPouchdb 
+};

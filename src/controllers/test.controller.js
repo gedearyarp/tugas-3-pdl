@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { read1, read2, read3 } = require('../services/test.service');
+const { read1, read2, read3, insertMahasiswa, updateMahasiswa, deleteMahasiswa } = require('../services/test.service');
 
 router.get('/read-1', async (req, res) => {
     const val = await read1();
@@ -18,15 +18,18 @@ router.get('/read-3', async (req, res) => {
 });
 
 router.post('/insert', async (req, res) => {
-    res.status(200).send('OK');
+    const val = await insertMahasiswa(req.body);
+    res.status(200).send(val);
 });
 
-router.put('/update', async (req, res) => {
-    res.status(200).send('OK');
+router.patch('/update', async (req, res) => {
+    const val = await updateMahasiswa(req.body);
+    res.status(200).send(val);
 });
 
 router.delete('/delete', async (req, res) => {
-    res.status(200).send('OK');
+    const val = await deleteMahasiswa(req.body);
+    res.status(200).send(val);
 });
 
 module.exports = router;
