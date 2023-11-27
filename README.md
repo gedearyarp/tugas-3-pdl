@@ -33,6 +33,7 @@ Developed by: I Gede Arya Raditya Parameswara - 13520036
 - Enjoy!
 
 If you successfully run the app server on your local machine, you can access this [link](http://localhost:5984/_utils/), and it will look like this.
-<img width="1470" alt="image" src="https://github.com/gedearyarp/tugas-3-pdl/assets/71829426/d60ffe7e-8c86-41aa-9136-c1b1b0b7b6d8">
+<img width="1468" alt="image" src="https://github.com/gedearyarp/tugas-3-pdl/assets/71829426/b237ee33-2ce8-45b7-ac2e-e06f4dbb8c00">
+
 
 
