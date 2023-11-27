@@ -39,7 +39,6 @@ const migrateTable = async (query, pouchDb) => {
   try {
     const res = await client.query(query);
     for (let row of res.rows) {
-      console.log('Migrasi data', row);
       await pouchDb.put({ ...row, _id: generateRandomId() });
     }
   } finally {
