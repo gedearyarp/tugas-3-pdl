@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "pouchdb-server": "pouchdb-server --port 5984 --dir ./pouchdb_data",
+    "migrate-db": "node migration/pg_to_pouchdb.js"
   },
   "keywords": [],
   "author": "",
